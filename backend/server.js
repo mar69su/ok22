@@ -101,45 +101,6 @@ isUserAdmin = (role) => {
 
 //LOGIN API
 
-/*
-app.post("/register", function(req, res) {
-	if(!req.body) {
-		return res.status(400).json({message:"Bad Request"});
-	}
-	if(!req.body.username || !req.body.password) {
-		return res.status(400).json({message:"Bad Request"});
-	}
-	if(req.body.username.length < 4 || req.body.password.length < 8) {
-		return res.status(400).json({message:"Bad Request"}); 
-	}
-	bcrypt.hash(req.body.password, 14, function(err, hash) {
-		if(err) {
-			return res.status(400).json({message:"Bad Request"}); 
-		}
-		let user = new userModel({
-			username:req.body.username,
-			password:hash,
-            manage_users:true,
-            manage_timetable:true,
-            manage_reservations:true
-		})
-		user.save(function(err, user) {
-			if (err) {
-				console.log("Failed to create user. Reason ", err);
-				if (err.code === 11000) {
-					return res.status(409).json({message: "Username already in use"});
-				}
-				return res.status(500).json({message: "Internal server error"});
-			}
-			if (!user) {
-				return res.status(500).json({message: "Internal server error"});
-			}
-			return res.status(201).json({message: "User registered!"});
-		})
-	})
-})
-*/
-
 app.post("/login", function(req, res) {
 	if (!req.body) {
 		return res.status(400).json({message: "Bad Request"});
@@ -185,7 +146,7 @@ app.post("/login", function(req, res) {
                     console.log("Failed to remove outdated sessions. Reason: ", err);
                 }
             })
-			return res.status(200).json({token: token});
+			return res.status(200).json({token: token, manageUsers: user.manage_users, manageReservations: user.manage_reservations, manageTimetables: user.manage_timetables});
 		})
 	})
 });
@@ -211,7 +172,6 @@ app.use("/admin/timetables", isUserLogged, isUserAdmin("timetables"), adminTimet
 app.use("/admin/users", isUserLogged, isUserAdmin("users"), adminUsersRoute);
 
 app.use("/reservations", reservationsRoute);
-
 
 app.listen(port);
 

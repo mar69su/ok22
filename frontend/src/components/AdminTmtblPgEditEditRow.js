@@ -2,14 +2,14 @@ import {useState} from 'react';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 
-const AdminTimetableEditRow = (props) => {
+const AdminTmtblPgEditEditRow = (props) => {
 
     const docks = ["Granvik", "Granholmen", "Björkholm", "Heisala", "Ramsholm", "Stenholm", "Aspholm", "Kuggö", "Pensar"];
 
     const [state, setState] = useState({
-		dock: props.item.dock,
-		start: props.item.start,
-		week: structuredClone(props.item.week)
+		dock: props.row.dock,
+		start: props.row.start,
+		week: structuredClone(props.row.week)
 	})
 
     const onChange = (event) => {
@@ -53,8 +53,23 @@ const AdminTimetableEditRow = (props) => {
         })
     }
 
-    const editItem = () => {
-        props.editItem(state, props.index);
+    const editRow = () => {
+        props.editRow(state, props.index);
+    }
+
+    const floodMonday = () => {
+        let tempArray = state.week;
+        for (let i = 0; i < tempArray.length; i++) {
+            tempArray[i].time = tempArray[0].time
+            tempArray[i].landing = tempArray[0].landing
+            tempArray[i].restriction = tempArray[0].restriction
+        }
+        setState((state) => {
+            return {
+                ...state,
+                week: tempArray
+            }
+        })
     }
 
     return (
@@ -125,12 +140,13 @@ const AdminTimetableEditRow = (props) => {
             ))}
             <td colSpan="2">
                 <div>
-                    <Button as="input" type="submit" value="Confirm" className="btn btn-primary col-4 btn-sm" onClick={editItem} />{' '}
-                    <Button as="input" type="submit" value="Cancel" className="btn btn-secondary col-4 btn-sm" onClick={() => props.changeMode("cancel")} />
+                    <Button as="input" type="submit" value="Confirm" className="btn btn-primary col-3 btn-sm" onClick={editRow} />{' '}
+                    <Button as="input" type="submit" value="Cancel" className="btn btn-secondary col-3 btn-sm" onClick={() => props.changeMode("cancel")} />{' '}
+                    <Button as="input" type="submit" value="Monday" className="btn btn-primary col-3 btn-sm" onClick={floodMonday} />
                 </div>
             </td>
 		</tr>
 	)
 }
 
-export default AdminTimetableEditRow;
+export default AdminTmtblPgEditEditRow;

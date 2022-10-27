@@ -1,15 +1,15 @@
 import Button from 'react-bootstrap/Button';
 
-const AdminTimetableRow = (props) => {
+const AdminTmtblPgEditRow = (props) => {
 
 	return(
 		<>
-			{(props.item.start) ? <tr><td colSpan="10"></td></tr> : null}
+			{(props.row.start) ? <tr><td colSpan="10"></td></tr> : null}
 			<tr>
 				<td>
-					{props.item.dock}
+					{(props.row.start) ? <strong>{props.row.dock}</strong> : <>{props.row.dock}</>}
 				</td>
-				{props.item.week.map((day, index) => (
+				{props.row.week.map((day, index) => (
 						<td key={"td" + props.index + "-" + index} className={ (day.restriction) ? "table-warning" : null}>
 							{day.time} {(day.landing === 1) ? "x" : null}{(day.landing === 2) ? "y" : null}{(day.landing === 3) ? "." : null}
 						</td>
@@ -26,4 +26,4 @@ const AdminTimetableRow = (props) => {
 	)
 }
 
-export default AdminTimetableRow;
+export default AdminTmtblPgEditRow;

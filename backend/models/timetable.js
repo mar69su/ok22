@@ -1,9 +1,9 @@
 const mongoose = require("mongoose");
 
 let Schema = mongoose.Schema({
-    beginDate: Date,
-    endDate: Date,
-    status: String,
+    begin_date: Date,
+    end_date: Date,
+    visible: Boolean,
     title: String,
     rows: [
         {

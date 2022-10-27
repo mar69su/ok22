@@ -2,13 +2,10 @@ import {useState} from 'react';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 
-const AdminUserEditRow = (props) => {
+const AdminUsrPgListEditRow = (props) => {
 
     const [state, setState] = useState({
-		username: props.user.username,
-		manageUsers: props.user.manage_users,
-        manageReservations: props.user.manage_reservations,
-        manageTimetables: props.user.manage_timetables
+		...props.user
 	})
 
     const onChange = (event) => {
@@ -41,60 +38,57 @@ const AdminUserEditRow = (props) => {
 
     const editUser = () => {
         let user = {
-            ...state,
-            id: props.user.id
+            ...state
         }
         props.editUser(user);
     }
 
-	return(
-            <tr key={props.index}>
-                <td>
-                    <Form.Group>
-                        <Form.Label>Username</Form.Label>
-                        <Form.Control type="text"
-                            id="username"
-                            name="username"
-                            placeholder="Username"
-                            aria-label="Username"
-                            onChange={onChange}
-                            value={state.username}
-                        />
-                    </Form.Group>
-                    <br />
-                    <Form.Check type="checkbox"
+    return (
+        <tr key={props.index}>
+            <td>
+                <Form.Group>
+                    <Form.Label>Username</Form.Label>
+                    <Form.Control type="text"
+                        id="username"
+                        name="username"
+                        placeholder="Username"
+                        aria-label="Username"
+                        onChange={onChange}
+                        value={state.username}
+                    />
+                </Form.Group>
+                <br />
+                <div>
+                    <Form.Check type="checkbox" inline
                         id="manageUsers"
                         name="manageUsers"
                         label="Manage users"
                         onChange={onChange}
                         checked={state.manageUsers} />
-                    <br />
                     <Form.Check 
-                        type="checkbox"
+                        type="checkbox" inline
                         id="manageReservations"
                         name="manageReservations"
                         label="Manage reservations"
                         onChange={onChange}
                         checked={state.manageReservations} />
-                    <br />
                     <Form.Check 
-                        type="checkbox"
+                        type="checkbox" inline
                         id="manageTimetables"
                         name="manageTimetables"
                         label="Manage timetables"
                         onChange={onChange}
                         checked={state.manageTimetables} />
-
-                </td>
-                <td>
-                    <div>
-                        <Button as="input" type="submit" value="Confirm" className="btn btn-primary btn-sm" onClick={() => editUser()} />{' '}
-						<Button as="input" type="submit" value="Cancel" className="btn btn-secondary btn-sm" onClick={() => props.changeMode("cancel")} />
-                    </div>
-                </td>
-            </tr>
-
-	)
+                </div>
+            </td>
+            <td>
+                <div>
+                    <Button as="input" type="submit" value="Confirm" className="btn btn-primary btn-sm" onClick={() => editUser()} />{' '}
+                    <Button as="input" type="submit" value="Cancel" className="btn btn-secondary btn-sm" onClick={() => props.changeMode("cancel")} />
+                </div>
+            </td>
+        </tr>
+    )
 }
 
-export default AdminUserEditRow;
+export default AdminUsrPgListEditRow;

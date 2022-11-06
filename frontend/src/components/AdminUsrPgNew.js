@@ -49,7 +49,6 @@ const AdminUsrPgNew = (props) => {
 
     const onSubmit = (event) => {
         event.preventDefault();
-        console.log("submit");
     }
 
     const addUser = () => {

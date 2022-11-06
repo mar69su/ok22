@@ -26,6 +26,7 @@ function App() {
 			visible: false,
 			rows: []
 		},
+		timetableOfDay: [{dock: "", time: ""}],
 		token: "",
 		isLogged: false,
 		manageUsers: false,
@@ -75,6 +76,7 @@ function App() {
 				visible: false,
 				rows: []
 			},
+			timetableOfDay: [],
 			isLogged: false,
 			manageUsers: false,
 			manageReservations: false,
@@ -183,12 +185,14 @@ function App() {
 	const saveTimetable = () => {
 		let id = state.timetable._id;
 		if (id) {
-			console.log("edit");
 			editTimetable(state.timetable, id);
 		} else {
-			console.log("add");
 			addTimetable(state.timetable);
 		}
+	}
+
+	const saveAsNewTimetable = () => {
+		addTimetable(state.timetable);
 	}
 
 	const clearTimetable = () => {
@@ -236,12 +240,12 @@ function App() {
 			if(!urlRequest.url) {
 				return;
 			}
-			console.log(urlRequest.url);
+			//console.log(urlRequest.url);
 			setLoading(true);
 			let response = await fetch(urlRequest.url, urlRequest.request);
 			setLoading(false);
 			if(response.ok) {
-				console.log("action: " + urlRequest.action);
+				//console.log("action: " + urlRequest.action);
 				switch(urlRequest.action) {
 					case "login":
 						let loginData = await response.json();
@@ -326,6 +330,19 @@ function App() {
 					case "removetimetable":
 						getTimetablesList();
 						return;
+					case "gettimetableofday":
+						let timetableOfDayData = await response.json();
+						if (timetableOfDayData) {
+							setState((state) => {
+								let tempState = {
+									...state,
+									timetableOfDay: timetableOfDayData
+								}
+								saveToStorage(tempState);
+								return tempState;
+							})
+						}
+						return;
 					default:
 						return;
 				}
@@ -369,6 +386,9 @@ function App() {
 					case "removetimetable":
 						setError("Removing timetable failed. Server responded with " + response.status + " " + response.statusText)
 						return;
+					case "gettimetableofday":
+						setError("Fetching timetable failed. Server responded with " + response.status + " " + response.statusText)
+						return;
 					default:
 						return;
 				}
@@ -408,7 +428,6 @@ function App() {
 	// - - - U S E R S - - -
 
     const getUsersList = (token) => {
-		console.log("getUsersList");
         let tempToken = state.token;
         if (token) {
             tempToken = token;
@@ -473,7 +492,6 @@ function App() {
 	// - - - T I M E T A B L E S - - -
 
 	const getTimetablesList = (token) => {
-		console.log("getTimetablesList");
         let tempToken = state.token;
         if (token) {
             tempToken = token;
@@ -534,6 +552,35 @@ function App() {
 		})
 	}
 
+	// - - - R E S E R V A T I O N S - - -
+
+	const getTimetableOfDay = (date) => {
+		setUrlRequest({
+			url: "/reservations/timetable/" + date,
+			request: {
+				method: "GET",
+				headers: {"Content-Type": "application/json"}
+			},
+			action: "gettimetableofday"
+		})
+	}
+
+	const addReservation = (reservation) => {
+		setUrlRequest({
+			url: "/reservations/add",
+			request: {
+				method: "POST",
+				headers: {"Content-Type": "application/json"},
+				body: JSON.stringify(reservation)
+			},
+			action: "addreservation"
+		})
+	}
+
+
+
+
+
 	// CONDITIONAL RENDERING
 
 	let loadingArea = <> </>
@@ -552,7 +599,7 @@ function App() {
 	let tempRender = (
 		<Routes>
 			<Route exact path="/" element={<FrontPage />} />
-			<Route path="/reservation" element={<ReservationPage/>}/>
+			<Route path="/reservation" element={<ReservationPage getTimetableOfDay={getTimetableOfDay} timetableOfDay={state.timetableOfDay} addReservation={addReservation} />}/>
 			<Route path="/timetable" element={<TimetablePage/>}/>
 			<Route path="*" element={<Navigate to="/" />} />
 		</Routes>
@@ -561,9 +608,9 @@ function App() {
 		tempRender = (
 			<Routes>
 				<Route exact path="/" element={<FrontPage />} />
-				<Route path="/admin/users" element={<AdminUsrPage addUser={addUser} editUser={editUser} editPassword={editPassword} removeUser={removeUser} usersList={state.usersList} />}/>
-				<Route path="/admin/reservations" element={<AdminReservationsPage/>}/>
-				<Route path="/admin/timetables" element={<AdminTmtblPage timetablesList={state.timetablesList} timetable={state.timetable} updateTimetableForm={updateTimetableForm} updateTimetableNewRow={updateTimetableNewRow} updateTimetableEditRow={updateTimetableEditRow} updateTimetableRemoveRow={updateTimetableRemoveRow} getTimetable={getTimetable} removeTimetable={removeTimetable} saveTimetable={saveTimetable} clearTimetable={clearTimetable} />}/>
+				<Route path="/admin/users" element={<AdminUsrPage getUsersList={getUsersList} usersList={state.usersList} addUser={addUser} editUser={editUser} editPassword={editPassword} removeUser={removeUser} />}/>
+				<Route path="/admin/reservations" element={<AdminReservationsPage />}/>
+				<Route path="/admin/timetables" element={<AdminTmtblPage getTimetablesList={getTimetablesList} timetablesList={state.timetablesList} timetable={state.timetable} updateTimetableForm={updateTimetableForm} updateTimetableNewRow={updateTimetableNewRow} updateTimetableEditRow={updateTimetableEditRow} updateTimetableRemoveRow={updateTimetableRemoveRow} getTimetable={getTimetable} removeTimetable={removeTimetable} saveTimetable={saveTimetable} saveAsNewTimetable={saveAsNewTimetable} clearTimetable={clearTimetable} />}/>
 				<Route path="*" element={<Navigate to="/" />} />
 			</Routes>
 		)

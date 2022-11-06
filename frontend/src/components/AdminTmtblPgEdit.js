@@ -72,7 +72,6 @@ const AdminTmtblPgEdit = (props) => {
 
     const onSubmit = (event) => {
         event.preventDefault();
-        console.log("submit");
     }
 
     let rows = props.timetable.rows.map((row, index) => {
@@ -181,7 +180,8 @@ const AdminTmtblPgEdit = (props) => {
                     <Col>
                         <div>
                             <Button as="input" type="submit" value="Save" className="btn btn-primary btn-sm" onClick={() => props.saveTimetable()} />{' '}
-                            <Button as="input" type="submit" value="Clear" className="btn btn-secondary btn-sm" onClick={() => props.clearTimetable()} />
+                            <Button as="input" type="submit" value="Clear" className="btn btn-secondary btn-sm" onClick={() => props.clearTimetable()} />{' '}
+                            <Button as="input" type="submit" value="Save as New" className="btn btn-primary btn-sm" onClick={() => props.saveAsNewTimetable()} />
                         </div>
                     </Col>
                 </Row>

@@ -1,4 +1,4 @@
-import {useState} from 'react';
+import {useState, useEffect} from 'react';
 import AdminTmtblPgEdit from './AdminTmtblPgEdit';
 import AdminTmtblPgList from './AdminTmtblPgList';
 import Tab from 'react-bootstrap/Tab';
@@ -17,6 +17,10 @@ const AdminTmtblPage = (props) => {
         props.removeTimetable(id);
     }
 
+    useEffect(() => {
+		props.getTimetablesList();
+	}, [])
+
     return (
         <Tabs activeKey={tabKey} onSelect={(k) => setTabKey(k)}>
 	        <Tab eventKey="list" title="Timetables">
@@ -25,7 +29,7 @@ const AdminTmtblPage = (props) => {
 	        </Tab>
 	        <Tab eventKey="edit" title="Edit">
                 <br />
-                <AdminTmtblPgEdit timetable={props.timetable}  updateTimetableForm={props.updateTimetableForm} updateTimetableNewRow={props.updateTimetableNewRow} updateTimetableEditRow={props.updateTimetableEditRow} updateTimetableRemoveRow={props.updateTimetableRemoveRow} saveTimetable={props.saveTimetable} clearTimetable={props.clearTimetable} />
+                <AdminTmtblPgEdit timetable={props.timetable}  updateTimetableForm={props.updateTimetableForm} updateTimetableNewRow={props.updateTimetableNewRow} updateTimetableEditRow={props.updateTimetableEditRow} updateTimetableRemoveRow={props.updateTimetableRemoveRow} saveTimetable={props.saveTimetable} saveAsNewTimetable={props.saveAsNewTimetable} clearTimetable={props.clearTimetable} />
         	</Tab>
         </Tabs>
     )

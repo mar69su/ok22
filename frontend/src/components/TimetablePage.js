@@ -7,4 +7,4 @@ const TimetablePage = () => {
     )
 }
 
-export default TimetablePage
+export default TimetablePage;

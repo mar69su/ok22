@@ -7,7 +7,6 @@ const router = express.Router();
 //DATABASE
 
 router.get("/list", function(req, res) {
-	console.log("getUsersList");
 	let query = {};
 	userModel.find(query, function(err, users) {
 		if (err) {

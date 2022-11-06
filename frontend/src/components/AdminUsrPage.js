@@ -1,4 +1,4 @@
-import {useState} from 'react';
+import {useState, useEffect} from 'react';
 import AdminUsrPgList from "./AdminUsrPgList";
 import AdminUsrPgNew from "./AdminUsrPgNew";
 import Tab from 'react-bootstrap/Tab';
@@ -7,6 +7,10 @@ import Tabs from 'react-bootstrap/Tabs';
 const AdminUsrPage = (props) => {
 
     const [tabKey, setTabKey] = useState('list');
+
+    useEffect(() => {
+		props.getUsersList();
+	}, [])
 
     return (
         <Tabs activeKey={tabKey} onSelect={(k) => setTabKey(k)}>

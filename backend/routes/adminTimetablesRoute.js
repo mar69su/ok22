@@ -6,7 +6,6 @@ const router = express.Router();
 //DATABASE
 
 router.get("/list", function(req, res) {
-	console.log("getTimetablesList");
 	let query = {};
 	timetableModel.find(query, function(err, timetables) {
 		if (err) {

@@ -27,13 +27,15 @@ function App() {
 			rows: []
 		},
 		timetableOfDay: [{dock: "", time: ""}],
+		reservation: {},
 		token: "",
 		isLogged: false,
 		manageUsers: false,
 		manageReservations: false,
 		manageTimetables: false,
 		loading: false,
-		error: ""
+		error: "",
+		message: ""
 	})
 	
 	const [urlRequest, setUrlRequest] = useState({
@@ -48,8 +50,7 @@ function App() {
 		setState((state) => {
 			return {
 				...state,
-				loading: loading,
-				error: ""
+				loading: loading
 			}
 		})
 	}
@@ -59,6 +60,17 @@ function App() {
 			let tempState = {
 				...state,
 				error: error
+			}
+			saveToStorage(tempState);
+			return tempState;
+		})
+	}
+
+	const setMessage = (message) => {
+		setState((state) => {
+			let tempState = {
+				...state,
+				message: message
 			}
 			saveToStorage(tempState);
 			return tempState;
@@ -83,7 +95,8 @@ function App() {
 			manageTimetables: false,
 			token: "",
 			loading: false,
-			error: ""
+			error: "",
+			message: ""
 		}
 		saveToStorage(state);
 		setState(state);
@@ -210,6 +223,17 @@ function App() {
         })
 	}
 
+	// RESERVATION STATE FUNCTIONS
+
+	const clearReservation = () => {
+        setState((state) => {
+            return {
+                ...state,
+				reservation: {}
+			}
+        })
+	}
+
 	// STORAGE FUNCTIONS
 
 	const saveToStorage = (state) => {
@@ -245,6 +269,7 @@ function App() {
 			let response = await fetch(urlRequest.url, urlRequest.request);
 			setLoading(false);
 			if(response.ok) {
+				let reservationData = {};
 				//console.log("action: " + urlRequest.action);
 				switch(urlRequest.action) {
 					case "login":
@@ -288,12 +313,15 @@ function App() {
 						return;
 					case "adduser":
 						getUsersList();
+						setMessage("New user added");
 						return;
 					case "edituser":
 						getUsersList();
+						setMessage("User edited succesfully");
 						return;
 					case "removeuser":
 						getUsersList();
+						setMessage("User removed");
 						return;
 					case "gettimetableslist":
 						let timetablesData = await response.json();
@@ -323,12 +351,17 @@ function App() {
 						return;
 					case "addtimetable":
 						getTimetablesList();
+						clearTimetable();
+						setMessage("Timetable added");
 						return;
 					case "edittimetable":
 						getTimetablesList();
+						clearTimetable();
+						setMessage("Timetable edited succesfully");
 						return;
 					case "removetimetable":
 						getTimetablesList();
+						setMessage("Timetable removed");
 						return;
 					case "gettimetableofday":
 						let timetableOfDayData = await response.json();
@@ -337,6 +370,56 @@ function App() {
 								let tempState = {
 									...state,
 									timetableOfDay: timetableOfDayData
+								}
+								saveToStorage(tempState);
+								return tempState;
+							})
+						}
+						return;
+					case "addreservation":
+						reservationData = await response.json();
+						if (reservationData) {
+							console.log(reservationData);
+							setMessage("Your Reservation ID is " + reservationData.token);
+						}
+						return;
+					case "getreservation":
+						reservationData = await response.json();
+						if (reservationData) {
+							setState((state) => {
+								let tempState = {
+									...state,
+									reservation: reservationData
+								}
+								saveToStorage(tempState);
+								return tempState;
+							})
+						}
+						return;
+					case "cancelreservation":
+						setMessage("Reservation cancelled succesfully.");
+						clearReservation();
+						return;
+					case "getvisibletimetableslist":
+						let visibleTimetablesData = await response.json();
+						if(visibleTimetablesData) {
+							setState((state) => {
+								let tempState = {
+									...state,
+									timetablesList: visibleTimetablesData
+								}
+								saveToStorage(tempState);
+								return tempState;
+							})
+						}
+						return;
+					case "getvisibletimetable":
+						let visibleTimetableData = await response.json();
+						if (visibleTimetableData) {
+							setState((state) => {
+								let tempState = {
+									...state,
+									timetable: visibleTimetableData
 								}
 								saveToStorage(tempState);
 								return tempState;
@@ -389,6 +472,18 @@ function App() {
 					case "gettimetableofday":
 						setError("Fetching timetable failed. Server responded with " + response.status + " " + response.statusText)
 						return;
+					case "getreservation":
+						setError("Fetching reservation failed. Server responded with " + response.status + " " + response.statusText)
+						return;
+					case "cancelreservation":
+						setError("Removing reservation failed. Server responded with " + response.status + " " + response.statusText)
+						return;
+					case "getvisibletimetableslist":
+						setError("Fetching timetableslist failed. Server responded with " + response.status + " " + response.statusText)
+						return;
+					case "getvisibletimetable":
+						setError("Fetching timetable failed. Server responded with " + response.status + " " + response.statusText)
+						return;
 					default:
 						return;
 				}
@@ -425,7 +520,7 @@ function App() {
 
 	// REST API
 
-	// - - - U S E R S - - -
+	// - - - A D M I N  U S E R S - - -
 
     const getUsersList = (token) => {
         let tempToken = state.token;
@@ -489,7 +584,7 @@ function App() {
 		})
 	}
 
-	// - - - T I M E T A B L E S - - -
+	// - - - A D M I N  T I M E T A B L E S - - -
 
 	const getTimetablesList = (token) => {
         let tempToken = state.token;
@@ -577,6 +672,51 @@ function App() {
 		})
 	}
 
+	const getReservation = (id, lp) => {
+		setUrlRequest({
+			url: "/reservations/one/" + id + "/" + lp,
+			request: {
+				method: "GET",
+				headers: {"Content-Type": "application/json"}
+			},
+			action: "getreservation"
+		})
+	}
+
+	const cancelReservation = (id) => {
+		setUrlRequest({
+			url: "/reservations/remove/" + id,
+			request: {
+				method: "DELETE",
+				headers: {"Content-Type": "application/json"}
+			},
+			action: "cancelreservation"
+		})
+	}
+
+	// - - - T I M E T A B L E S - - -
+
+	const getVisibleTimetablesList = () => {
+		setUrlRequest({
+			url: "/timetables/list",
+			request: {
+				method: "GET",
+				headers: {"Content-Type": "application/json"}
+			},
+			action: "getvisibletimetableslist"
+		})
+	}
+
+	const getVisibleTimetable = (id) => {
+		setUrlRequest({
+			url: "/timetables/one/" + id,
+			request: {
+				method: "GET",
+				headers: {"Content-Type": "application/json"}
+			},
+			action: "getvisibletimetable"
+		})
+	}
 
 
 
@@ -596,11 +736,18 @@ function App() {
 			</Alert>
 		)
 	}
+	if (state.message) {
+		messageArea = (
+			<Alert variant="info" onClose={() => setMessage()} dismissible>
+				{state.message}
+			</Alert>
+		)
+	}
 	let tempRender = (
 		<Routes>
 			<Route exact path="/" element={<FrontPage />} />
-			<Route path="/reservation" element={<ReservationPage getTimetableOfDay={getTimetableOfDay} timetableOfDay={state.timetableOfDay} addReservation={addReservation} />}/>
-			<Route path="/timetable" element={<TimetablePage/>}/>
+			<Route path="/reservation" element={<ReservationPage getTimetableOfDay={getTimetableOfDay} timetableOfDay={state.timetableOfDay} addReservation={addReservation} getReservation={getReservation} clearReservation={clearReservation} reservation={state.reservation} cancelReservation={cancelReservation} />}/>
+			<Route path="/timetable" element={<TimetablePage getVisibleTimetablesList={getVisibleTimetablesList} getVisibleTimetable={getVisibleTimetable} timetablesList={state.timetablesList} timetable={state.timetable} />}/>
 			<Route path="*" element={<Navigate to="/" />} />
 		</Routes>
 	)

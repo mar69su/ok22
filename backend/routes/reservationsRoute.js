@@ -5,7 +5,7 @@ const reservationModel = require("../models/reservation");
 const router = express.Router();
 
 generateToken = (n) => {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ23456789';
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
     let token = '';
     for (let i = 0; i < n; i++) {
         token += chars[Math.floor(Math.random() * chars.length)];
@@ -18,7 +18,6 @@ generateToken = (n) => {
 
 router.get("/timetable/:date", function(req, res) {
 	let dateDate = new Date(req.params.date);
-	//let isoDate = dateDate.toISOString();
 	cursor = dateDate.getDay();
 	if (cursor > 0) {
 		cursor--;
@@ -31,7 +30,6 @@ router.get("/timetable/:date", function(req, res) {
 			console.log("Failed to find timetable. Reason ", err);
 			return res.status(500).json({message: "Internal server error"})
 		}
-		console.log(timetable);
 		let fixedTimetable = [];
 		if (timetable) {
 			fixedTimetable = timetable.rows.reduce(function(result, row) {
@@ -52,11 +50,70 @@ router.get("/timetable/:date", function(req, res) {
 	})
 });
 
-// list reservations
+router.get("/one/:id/:lp", function(req, res) {
+	let query = {token: req.params.id, licence_plate: req.params.lp};
+	reservationModel.findOne(query, function(err, reservation) {
+		if (err) {
+			console.log("Failed to find reservation. Reason ", err);
+			return res.status(500).json({message: "Internal server error"})
+		}
+		if (reservation) {
+			let dateDate = new Date(reservation.date);
+			cursor = dateDate.getDay();
+			if (cursor > 0) {
+				cursor--;
+			} else {
+				cursor = 6
+			}
+			let query = {visible: true, begin_date: { $lte: dateDate }, end_date: { $gte: dateDate }};
+			timetableModel.findOne(query, function(err, timetable) {
+				if (err) {
+					console.log("Failed to find timetable. Reason ", err);
+					return res.status(500).json({message: "Internal server error"})
+				}
+				let tour = [];
+				if (timetable) {
+					let tourCounter = -1;
+					tour = timetable.rows.reduce(function(result, row) {
+						if (row.week[cursor].landing) {
+							if (row.start) {
+								tourCounter++;
+							}
+							if (tourCounter === reservation.tour_of_day) {
+								result.push({
+									dock: row.dock,
+									time: row.week[cursor].time
+								});
+							}
+						}
+						return result;
+					}, []);
+					if (tour) {
+						let fixedReservation = {
+							_id: reservation._id,
+							token: reservation.token,
+							date: reservation.date,
+							tourOfDay: tour[0].dock + " " + tour[0].time,
+							inDock: tour[reservation.indock_of_tour].dock + " " + tour[reservation.indock_of_tour].time,
+							outDock: tour[reservation.outdock_of_tour].dock + " " + tour[reservation.outdock_of_tour].time,
+							vehicle: reservation.vehicle,
+							licencePlate: reservation.licence_plate,
+							telephone: reservation.telephone
+						};
+						console.log(fixedReservation);
+						return res.status(200).json(fixedReservation);
+					
+					}
+				} else {
+					return res.status(404).json({message:"Not found!"});
+				}
+			})
+		} else {
+			return res.status(404).json({message:"Not found!"});
+		}
+	})
+});
 
-// get one reservation
-
-// create reservation
 
 router.post("/add", function(req, res) {
 	if (!req.body) {
@@ -81,12 +138,18 @@ router.post("/add", function(req, res) {
 		if (!reservation) {
 			return res.status(500).json({message: "Internal server error"});
 		}
-		return res.status(201).json({message: "Success"});
+		return res.status(201).json({token: token});
 	})
 })
 
-// edit reservation
-
-// remove reservation
+router.delete("/remove/:id", function(req, res) {
+	reservationModel.deleteOne({"_id": req.params.id}, function(err) {
+		if (err) {
+			console.log("Failed to remove reservation. Reason ", err);
+			return res.status(500).json({message: "Internal server error"});
+		}
+		return res.status(200).json({message: "Success"});
+	})
+})
 
 module.exports = router;

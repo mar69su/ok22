@@ -5,7 +5,7 @@ const AdminTmtblPgListRemoveRow = (props) => {
     return (
         <tr>
             <td>
-                {props.timetable.title + " (" + props.timetable.begin_date + " - " + props.timetable.endDate + ")" }
+                {props.timetable.title + " (" + props.timetable.beginDate + " - " + props.timetable.endDate + ")" }
             </td>
             <td>
                 <div>

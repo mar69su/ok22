@@ -64,48 +64,32 @@ router.post("/add", function(req, res) {
 	})
 })
 
-/*
-function notSameUser(id, username) {
-	let query = {"_id": id, "username": username};
-	userModel.findOne(query, function(err, user) {
-		if (err) {
-			return false;
-		}
-		if (user) {
-			return false;
-		}
-		return true;
-	})
-}
-*/
-
-// TODO: user ei saa muokata itseään
 router.put("/edit/:id", function(req, res) {
-	if (!req.body) {
-		return res.status(400).json({message: "Bad request"});
-	}
-/*
-	let doIt = notSameUser(req.params.id, req.session.user);
-	if (doIt) {
-		console.log("Ei yritä muokata omia oikeuksia" + doIt);
-	} else {
-		console.log("Yrittää muokata omia oikeuksia" + doIt);
-	}
-*/
-	let user = {
-		username:req.body.username,
-		manage_users:req.body.manageUsers,
-		manage_timetables:req.body.manageTimetables,
-		manage_reservations:req.body.manageReservations
-	}
-	userModel.updateOne({"_id": req.params.id}, user, function (err) {
+	let query = {"_id": req.params.id, "username": req.session.user};
+	userModel.findOne(query, function(err, admin) {
 		if (err) {
-			console.log("Failed to update user. Reason ", err);
 			return res.status(500).json({message: "Internal server error"});
 		}
-		return res.status(200).json({message: "Success"});
+		if (admin) {
+			return res.status(401).json({message:"Unauthorized!"});
+		}
+		if (!req.body) {
+			return res.status(400).json({message: "Bad request"});
+		}
+		let user = {
+			username:req.body.username,
+			manage_users:req.body.manageUsers,
+			manage_timetables:req.body.manageTimetables,
+			manage_reservations:req.body.manageReservations
+		}
+		userModel.updateOne({"_id": req.params.id}, user, function (err) {
+			if (err) {
+				console.log("Failed to update user. Reason ", err);
+				return res.status(500).json({message: "Internal server error"});
+			}
+			return res.status(200).json({message: "Success"});
+		})
 	})
-
 })
 
 router.put("/password/:id", function(req, res) {
@@ -135,14 +119,22 @@ router.put("/password/:id", function(req, res) {
 	})
 })
 
-// TODO: user ei saa poistaa itseään
 router.delete("/remove/:id", function(req, res) {
-	userModel.deleteOne({"_id": req.params.id}, function(err) {
+	let query = {"_id": req.params.id, "username": req.session.user};
+	userModel.findOne(query, function(err, admin) {
 		if (err) {
-			console.log("Failed to remove user. Reason ", err);
 			return res.status(500).json({message: "Internal server error"});
 		}
-		return res.status(200).json({message: "Success"});
+		if (admin) {
+			return res.status(401).json({message:"Unauthorized!"});
+		}
+		userModel.deleteOne({"_id": req.params.id}, function(err) {
+			if (err) {
+				console.log("Failed to remove user. Reason ", err);
+				return res.status(500).json({message: "Internal server error"});
+			}
+			return res.status(200).json({message: "Success"});
+		})
 	})
 })
 

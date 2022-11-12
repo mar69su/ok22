@@ -8,6 +8,7 @@ const adminReservationsRoute = require("./routes/adminReservationsRoute");
 const adminTimetablesRoute = require("./routes/adminTimetablesRoute");
 const adminUsersRoute = require("./routes/adminUsersRoute");
 const reservationsRoute = require("./routes/reservationsRoute");
+const timetablesRoute = require("./routes/timetablesRoute");
 
 let app = express();
 
@@ -172,6 +173,8 @@ app.use("/admin/timetables", isUserLogged, isUserAdmin("timetables"), adminTimet
 app.use("/admin/users", isUserLogged, isUserAdmin("users"), adminUsersRoute);
 
 app.use("/reservations", reservationsRoute);
+
+app.use("/timetables", timetablesRoute);
 
 app.listen(port);
 

@@ -6,10 +6,17 @@ import Form from 'react-bootstrap/Form';
 import Row from 'react-bootstrap/esm/Row';
 import Table from 'react-bootstrap/esm/Table';
 
-const ReservationPageDate = (props) => {
+const ReservationPgDate = (props) => {
 
     const onChange = (event) => {
         let date = event.target.value
+        const dateMin = new Date();
+        const dateMax = new Date();
+        dateMax.setDate(dateMin.getDate() + 24)
+        const inputDate = new Date(date);
+        if (inputDate < dateMin || inputDate > dateMax) {
+            date = dateMin.toISOString().split('T')[0];
+        }
         props.setState((state) => {
             return {
                 ...state,
@@ -72,9 +79,9 @@ const ReservationPageDate = (props) => {
                 <Table className="table table-sm">
                     <thead>
                         <tr>
-                            <th className="col-2">Dock</th>
-                            <th className="col-2"></th>
-                            <th className="col-2"></th>
+                            <th>Dock</th>
+                            <th></th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -107,4 +114,4 @@ const ReservationPageDate = (props) => {
     )
 }
 
-export default ReservationPageDate;
+export default ReservationPgDate;

@@ -5,7 +5,7 @@ const AdminTmtblPgListRow = (props) => {
     return (
         <tr>
             <td>
-                {props.timetable.title + " (" + props.timetable.beginDate + " - " + props.timetable.endDate + ")" }
+                {props.timetable.visible ? <strong>{props.timetable.title + " (" + props.timetable.beginDate + " - " + props.timetable.endDate + ")"}</strong> : props.timetable.title + " (" + props.timetable.beginDate + " - " + props.timetable.endDate + ")"}
             </td>
             <td>
                 <div>

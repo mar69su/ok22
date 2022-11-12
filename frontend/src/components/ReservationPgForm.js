@@ -4,9 +4,11 @@ import Container from 'react-bootstrap/esm/Container';
 import Form from 'react-bootstrap/Form';
 import Row from 'react-bootstrap/esm/Row';
 
-const ReservationPageForm = (props) => {
+const ReservationPgForm = (props) => {
 
     const vehicles = ["Car", "Car with trailer", "Car with caravan", "Consumer Trucks", "Semi-Truck", "Bus", "Tractor", "SUV", "Van", "Campervan"];
+    const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
     const onChange = (event) => {
         const name = event.target.name;
@@ -55,9 +57,20 @@ const ReservationPageForm = (props) => {
         event.preventDefault();
     }
 
+    const d = new Date(props.state.date);
+    let line = "";
+    if (props.state.tours.length > 0) {
+        line = days[d.getDay()] + " " + months[d.getMonth()] + " " + d.getDate() + " " + props.state.tours[props.state.tourCursor][0].dock + " " + props.state.tours[props.state.tourCursor][0].time;
+    }
+
     return (
         <Form onSubmit={onSubmit}>
             <Container>
+                <Row><Col xs={3}>
+                <strong>
+                    {line}
+                </strong>
+                </Col></Row>
                 <Row><Col xs={3}>
                     <Form.Group>
                         <Form.Label>Starting dock</Form.Label>
@@ -118,4 +131,4 @@ const ReservationPageForm = (props) => {
     )
 }
 
-export default ReservationPageForm;
+export default ReservationPgForm;

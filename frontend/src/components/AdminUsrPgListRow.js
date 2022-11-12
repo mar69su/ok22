@@ -11,17 +11,17 @@ const AdminUsrPgListRow = (props) => {
                             id={"manageUsers" + props.index}
                             name={"manageUsers" + props.index}
                             label="Manage users"
-                            defaultChecked={props.user.manageUsers} />
+                            checked={props.user.manageUsers} />
                         <Form.Check type="checkbox" inline disabled
                             id={"manageReservations" + props.index}
                             name={"manageReservations" + props.index}
                             label="Manage reservations"
-                            defaultChecked={props.user.manageReservations} />
+                            checked={props.user.manageReservations} />
                         <Form.Check type="checkbox" inline disabled
                             id={"manageTimetables" + props.index}
                             name={"manageTimetables" + props.index}
                             label="Manage timetables"
-                            defaultChecked={props.user.manageTimetables} />
+                            checked={props.user.manageTimetables} />
                     </div>
                 </td>
                 <td>

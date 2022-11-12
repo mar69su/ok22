@@ -1,6 +1,7 @@
 import {useState, useEffect} from 'react';
-import ReservationPageDate from './ReservationPgDate';
-import ReservationPageForm from './ReservationPgForm';
+import ReservationPgCancel from './ReservationPgCancel';
+import ReservationPgDate from './ReservationPgDate';
+import ReservationPgForm from './ReservationPgForm';
 import Tab from 'react-bootstrap/Tab';
 import Tabs from 'react-bootstrap/Tabs';
 
@@ -17,8 +18,13 @@ const ReservationPage = (props) => {
         outDock: "",
         vehicle: "Car",
         licencePlate: "",
-        telephone: ""
+        telephone: "",
+        reservationID: ""
     });
+
+    useEffect(() => {
+		props.clearReservation();
+	}, [])
 
     const [tabKey, setTabKey] = useState("step1");
 
@@ -62,18 +68,27 @@ const ReservationPage = (props) => {
             telephone: state.telephone
         }
         props.addReservation(reservation);
+        setTabKey("reservations");
+    }
+
+    const getReservation = () => {
+        props.getReservation(state.reservationID, state.licencePlate);
     }
 
     return (
         <Tabs activeKey={tabKey} onSelect={(k) => setTabKey(k)}>
 	        <Tab eventKey="step1" title="Step 1">
                 <br />
-                <ReservationPageDate state={state} setState={setState} timetableOfDay={props.timetableOfDay} getTimetableOfDay={props.getTimetableOfDay} goToStepTwo={goToStepTwo} />
+                <ReservationPgDate state={state} setState={setState} timetableOfDay={props.timetableOfDay} getTimetableOfDay={props.getTimetableOfDay} goToStepTwo={goToStepTwo} />
 	        </Tab>
 	        <Tab eventKey="step2" title="Step 2" disabled={state.inDock ? false : true}>
                 <br />
-                <ReservationPageForm state={state}  setState={setState} addReservation={addReservation} />
+                <ReservationPgForm state={state}  setState={setState} addReservation={addReservation} />
         	</Tab>
+	        <Tab eventKey="reservations" title="Reservations">
+                <br />
+                <ReservationPgCancel state={state}  setState={setState} getReservation={getReservation} reservation={props.reservation} cancelReservation={props.cancelReservation} />
+	        </Tab>
         </Tabs>
     )
 }

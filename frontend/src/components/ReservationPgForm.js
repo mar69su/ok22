@@ -28,11 +28,10 @@ const ReservationPgForm = (props) => {
         let outDocks = props.state.tours[props.state.tourCursor].map((tour, index) => {
             return [index, tour.dock];
         });
-        let inDock = event.target.value;
-        let index = parseInt(inDock.charAt(inDock.length-1)) + 1;
-        outDocks.splice(0, index);
-        if (index === 0) {
-            outDocks.splice(outDocks.length - 1, 1);
+        let inDock = parseInt(event.target.value);
+        outDocks.splice(0, (inDock + 1));
+        if (inDock === 0) {
+            outDocks.splice((outDocks.length - 1), 1);
         }
         props.setState((state) => {
             return {
@@ -74,28 +73,28 @@ const ReservationPgForm = (props) => {
                 <Row><Col xs={3}>
                     <Form.Group>
                         <Form.Label>Starting dock</Form.Label>
-                            <Form.Select id="inDock" name="inDock" value={props.state.inDock} onChange={onInDockChange}>
-                                {props.state.inDocks.map((dock, index) => (
-                                    <option key={"in" + index} value={dock[0]}>{dock[1]}</option>
-                            ))}</Form.Select>
+                        <Form.Select id="inDock" name="inDock" value={props.state.inDock} onChange={onInDockChange}>
+                            {props.state.inDocks.map((dock, index) => (
+                                <option key={"in" + index} value={dock[0]}>{dock[1]}</option>
+                        ))}</Form.Select>
                     </Form.Group>
                 </Col></Row>
                 <Row><Col xs={3}>
                     <Form.Group>
                         <Form.Label>Destination dock</Form.Label>
-                            <Form.Select id="outDock" name="outDock" value={props.state.outDock} onChange={onOutDockChange}>
-                                {props.state.outDocks.map((dock, index) => (
-                                    <option key={"out" + index} value={dock[0]}>{dock[1]}</option>
-                            ))}</Form.Select>
+                        <Form.Select id="outDock" name="outDock" value={props.state.outDock} onChange={onOutDockChange}>
+                            {props.state.outDocks.map((dock, index) => (
+                                <option key={"out" + index} value={dock[0]}>{dock[1]}</option>
+                        ))}</Form.Select>
                     </Form.Group>
                 </Col></Row>
                 <Row><Col xs={3}>
                     <Form.Group>
                         <Form.Label>Vehicle</Form.Label>
-                            <Form.Select id="vehicle" name="vehicle" value={props.state.vehicle} onChange={onChange}>
-                                {vehicles.map((vehicle, index) => (
-                                    <option key={"v" + index} value={vehicle}>{vehicle}</option>
-                            ))}</Form.Select>
+                        <Form.Select id="vehicle" name="vehicle" value={props.state.vehicle} onChange={onChange}>
+                            {vehicles.map((vehicle, index) => (
+                                <option key={"v" + index} value={vehicle}>{vehicle}</option>
+                        ))}</Form.Select>
                     </Form.Group>
                 </Col></Row>
                 <Row><Col xs={3}>

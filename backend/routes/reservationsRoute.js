@@ -100,7 +100,7 @@ router.get("/one/:id/:lp", function(req, res) {
 							licencePlate: reservation.licence_plate,
 							telephone: reservation.telephone
 						};
-						console.log(fixedReservation);
+						//console.log(fixedReservation);
 						return res.status(200).json(fixedReservation);
 					
 					}

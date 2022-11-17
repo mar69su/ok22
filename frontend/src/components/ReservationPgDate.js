@@ -12,10 +12,10 @@ const ReservationPgDate = (props) => {
         let date = event.target.value
         const dateMin = new Date();
         const dateMax = new Date();
-        dateMax.setDate(dateMin.getDate() + 24)
+        dateMax.setDate(dateMin.getDate() + 24);
         const inputDate = new Date(date);
         if (inputDate < dateMin || inputDate > dateMax) {
-            date = dateMin.toISOString().split('T')[0];
+            date = dateMin.toISOString().substring(0, 10);
         }
         props.setState((state) => {
             return {
@@ -56,14 +56,36 @@ const ReservationPgDate = (props) => {
         })
 	}, [props.timetableOfDay])
 
+    const reserveButton = (index, time, restriction) => {
+        const h = Number.parseInt(time.substring(0, 2));
+        const min = Number.parseInt(time.substring(3, 5));
+        const now = new Date();
+        const tourDate = new Date(props.state.date);
+        tourDate.setHours(h, min, 0, 0);
+        let disabled = false;
+        if (tourDate <= now) {
+            disabled = true;
+        }
+        if (restriction) {
+            now.setDate(now.getDate() + 7);
+            if (tourDate > now) {
+                disabled = true;
+            }
+        }
+        //console.log(tourDate - now);
+        return (
+            <Button as="input" type="submit" value="Reserve" className="btn btn-secondary btn-sm" disabled={disabled} onClick={() => props.goToStepTwo(index)} />
+        )
+    }
+
     let rows = props.timetableOfDay.map((row, index) => {
         return (
-            <tr key={index}>
+            <tr key={index} className={(row.restriction) ? "table-warning" : null}>
                 {(row.start) ? <td><strong>{row.dock}</strong></td> : <td>{row.dock}</td>}
                 <td>{row.time}{(row.landing === 1) ? "x" : null}{(row.landing === 2) ? "y" : null}</td>
                 <td>
                 <div>
-                {(row.start) ? <Button as="input" type="submit" value="Reserve" className="btn btn-secondary btn-sm" onClick={() => props.goToStepTwo(index)} /> : null}
+                {(row.start) ? reserveButton(index, row.time, row.restriction) : null}
                 </div>
 
                 </td>

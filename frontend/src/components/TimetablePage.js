@@ -39,6 +39,10 @@ const TimetablePage = (props) => {
                 </thead>
                 <tbody>
                     {rows}
+                    <tr><td colSpan="8"></td></tr>
+                    <tr><td colSpan="8">x = anlöpes vid behov / poiketaan tarvittaessa.</td></tr>
+                    <tr><td colSpan="8">y =  bör beställas minst 10 min före avg. från Granvik, morgonturen föreg. kväll före kl. 17:00/Tilattava vähint. 10 min ennen lähtöä Granvikista, aamuvuoro ed. iltana ennen klo 17:00</td></tr>
+                    <tr><td colSpan="8" className="table-warning">Reservering av bilplats tidigast samma veckas måndag / autopaikan varaus aikaisintaan saman viikon maanantaista alkaen.</td></tr>
                 </tbody>
             </Table>
         )

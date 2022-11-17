@@ -7,7 +7,7 @@ import Row from 'react-bootstrap/esm/Row';
 import {Routes, Route, Navigate} from 'react-router-dom';
 import Navigationbar from './components/Navigationbar';
 import AdminTmtblPage from './components/AdminTmtblPage';
-import AdminReservationsPage from './components/AdminReservationsPage';
+import AdminRsrvtnsPage from './components/AdminRsrvtnsPage';
 import AdminUsrPage from './components/AdminUsrPage';
 import FrontPage from './components/FrontPage';
 import ReservationPage from './components/ReservationPage';
@@ -28,6 +28,8 @@ function App() {
 		},
 		timetableOfDay: [{dock: "", time: ""}],
 		reservation: {},
+		reservationsOfDay: [],
+		reservationDate: "",
 		token: "",
 		isLogged: false,
 		manageUsers: false,
@@ -89,6 +91,9 @@ function App() {
 				rows: []
 			},
 			timetableOfDay: [],
+			reservation: {},
+			reservationsOfDay: [],
+			reservationDate: "",
 			isLogged: false,
 			manageUsers: false,
 			manageReservations: false,
@@ -223,6 +228,17 @@ function App() {
         })
 	}
 
+	// ADMIN RESERVATION STATE FUNCTIONS
+
+	const setReservationDate = (date) => {
+        setState((state) => {
+            return {
+                ...state,
+				reservationDate: date
+			}
+        })
+	}
+
 	// RESERVATION STATE FUNCTIONS
 
 	const clearReservation = () => {
@@ -244,14 +260,6 @@ function App() {
 		if (sessionStorage.getItem("state")) {
 			let state = JSON.parse(sessionStorage.getItem("state"));
 			setState(state);
-			if (state.isLogged) {
-				if (state.manageUsers) {
-					getUsersList(state.token);
-				}
-				if (state.manageTimetables) {
-					getTimetablesList(state.token);
-				}
-			}
 		}
 	}, [])
 
@@ -287,12 +295,6 @@ function App() {
 								saveToStorage(tempState);
 								return tempState;
 							});
-							if (loginData.manageTimetables) {
-								getTimetablesList(loginData.token);
-							}
-							if (loginData.manageUsers) {
-								getUsersList(loginData.token);
-							}
 						}
 						return;
 					case "logout":
@@ -379,7 +381,7 @@ function App() {
 					case "addreservation":
 						reservationData = await response.json();
 						if (reservationData) {
-							console.log(reservationData);
+							clearReservation();
 							setMessage("Your Reservation ID is " + reservationData.token);
 						}
 						return;
@@ -399,6 +401,28 @@ function App() {
 					case "cancelreservation":
 						setMessage("Reservation cancelled succesfully.");
 						clearReservation();
+						return;
+					case "getreservationsofday":
+						let reservationOfDayData = await response.json();
+						if (reservationOfDayData) {
+							setState((state) => {
+								let tempState = {
+									...state,
+									timetableOfDay: reservationOfDayData.timetable,
+									reservationsOfDay: reservationOfDayData.reservations
+								}
+								saveToStorage(tempState);
+								return tempState;
+							})
+						}
+						return;
+					case "editreservation":
+						setMessage("Reservation edited succesfully.");
+						getReservationsOfDay(state.reservationDate);
+						return;
+					case "removereservation":
+						setMessage("Reservation removed succesfully.");
+						getReservationsOfDay(state.reservationDate);
 						return;
 					case "getvisibletimetableslist":
 						let visibleTimetablesData = await response.json();
@@ -478,6 +502,15 @@ function App() {
 					case "cancelreservation":
 						setError("Removing reservation failed. Server responded with " + response.status + " " + response.statusText)
 						return;
+					case "getreservationsofday":
+						setError("Fetching reservation failed. Server responded with " + response.status + " " + response.statusText)
+						return;
+					case "editreservation":
+						setError("Editinting reservation failed. Server responded with " + response.status + " " + response.statusText)
+						return;
+					case "removereservation":
+						setError("Removing reservation failed. Server responded with " + response.status + " " + response.statusText)
+						return;
 					case "getvisibletimetableslist":
 						setError("Fetching timetableslist failed. Server responded with " + response.status + " " + response.statusText)
 						return;
@@ -489,7 +522,7 @@ function App() {
 				}
 			}
 		}
-		
+
 		fetchData();
 	}, [urlRequest]);
 	
@@ -522,16 +555,12 @@ function App() {
 
 	// - - - A D M I N  U S E R S - - -
 
-    const getUsersList = (token) => {
-        let tempToken = state.token;
-        if (token) {
-            tempToken = token;
-        }
-        setUrlRequest({
+	const getUsersList = () => {
+		setUrlRequest({
             url: "/admin/users/list",
             request: {
                 method: "GET",
-                headers: {"Content-Type": "application/json", token: tempToken}
+                headers: {"Content-Type": "application/json", token: state.token}
             },
             action: "getuserslist"
         })
@@ -584,18 +613,51 @@ function App() {
 		})
 	}
 
+	// - - - A D M I N  R E S E R V A T I O N S - - -
+
+	const getReservationsOfDay = (date) => {
+		setUrlRequest({
+			url: "/admin/reservations/reservations/" + date,
+			request: {
+				method: "GET",
+				headers: {"Content-Type": "application/json", token: state.token}
+			},
+			action: "getreservationsofday"
+		})
+	}
+
+	const editReservation = (reservation) => {
+		setUrlRequest({
+			url: "/admin/reservations/edit/" + reservation._id,
+			request: {
+				method: "PUT",
+				headers: {"Content-Type": "application/json", token: state.token},
+				body: JSON.stringify(reservation)
+			},
+			action: "editreservation"
+		})
+	}
+
+    const removeReservation = (id) => {
+		setUrlRequest({
+			url: "/admin/reservations/remove/" + id,
+			request: {
+				method: "DELETE",
+				headers: {"Content-Type": "application/json", token: state.token}
+			},
+			action: "removereservation"
+		})
+    }
+
+
 	// - - - A D M I N  T I M E T A B L E S - - -
 
-	const getTimetablesList = (token) => {
-        let tempToken = state.token;
-        if (token) {
-            tempToken = token;
-        }
+	const getTimetablesList = () => {
 		setUrlRequest({
 			url: "/admin/timetables/list",
 			request: {
 				method: "GET",
-				headers: {"Content-Type": "application/json", token: tempToken}
+				headers: {"Content-Type": "application/json", token: state.token}
 			},
 			action: "gettimetableslist"
 		})
@@ -756,7 +818,7 @@ function App() {
 			<Routes>
 				<Route exact path="/" element={<FrontPage />} />
 				<Route path="/admin/users" element={<AdminUsrPage getUsersList={getUsersList} usersList={state.usersList} addUser={addUser} editUser={editUser} editPassword={editPassword} removeUser={removeUser} />}/>
-				<Route path="/admin/reservations" element={<AdminReservationsPage />}/>
+				<Route path="/admin/reservations" element={<AdminRsrvtnsPage getReservationsOfDay={getReservationsOfDay} timetableOfDay={state.timetableOfDay} reservationsOfDay={state.reservationsOfDay} setReservationDate={setReservationDate} editReservation={editReservation} removeReservation={removeReservation} />}/>
 				<Route path="/admin/timetables" element={<AdminTmtblPage getTimetablesList={getTimetablesList} timetablesList={state.timetablesList} timetable={state.timetable} updateTimetableForm={updateTimetableForm} updateTimetableNewRow={updateTimetableNewRow} updateTimetableEditRow={updateTimetableEditRow} updateTimetableRemoveRow={updateTimetableRemoveRow} getTimetable={getTimetable} removeTimetable={removeTimetable} saveTimetable={saveTimetable} saveAsNewTimetable={saveAsNewTimetable} clearTimetable={clearTimetable} />}/>
 				<Route path="*" element={<Navigate to="/" />} />
 			</Routes>
